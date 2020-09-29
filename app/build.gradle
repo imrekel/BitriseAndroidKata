@@ -2,9 +2,14 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 
-// setting up code signing environment
+// accessing local.properties
 Properties properties = new Properties()
-properties.load(project.rootProject.file('local.properties').newDataInputStream())
+def propertiesFile = project.rootProject.file('local.properties')
+if (propertiesFile.exists()) {
+    properties.load(project.rootProject.file('local.properties').newDataInputStream())
+}
+
+// setting up code signing environment
 def codeSigningKeyAlias =  System.hasProperty("BITRISEIO_ANDROID_KEYSTORE_ALIAS") ?  System.getenv('BITRISEIO_ANDROID_KEYSTORE_ALIAS') : properties.getProperty("bitriseio.android_keystore_alias")
 def codeSigningKeyPassword = System.hasProperty("BITRISEIO_ANDROID_KEYSTORE_PRIVATE_KEY_PASSWORD") ?  System.getenv('BITRISEIO_ANDROID_KEYSTORE_PRIVATE_KEY_PASSWORD') : properties.getProperty("bitriseio.android_keystore_private_key_password")
 def codeSigningStorePassword = System.hasProperty("BITRISEIO_ANDROID_KEYSTORE_PASSWORD") ?  System.getenv('BITRISEIO_ANDROID_KEYSTORE_PASSWORD') : properties.getProperty("bitriseio.android_keystore_password")
