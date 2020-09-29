@@ -21,7 +21,7 @@ class WelcomeMessageTest {
             = ActivityScenarioRule(MainActivity::class.java)
 
     @Test
-    fun Test_sameActivity() {
+    fun Test_homeActivity_userWelcomeMessageFlow() {
 
         onView(withId(R.id.editTextName))
             .perform(typeText("UserName"), closeSoftKeyboard())
