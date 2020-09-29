@@ -2,13 +2,20 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 
+// setting up code signing environment
+Properties properties = new Properties()
+properties.load(project.rootProject.file('local.properties').newDataInputStream())
+def codeSigningKeyAlias =  System.hasProperty("BITRISEIO_ANDROID_KEYSTORE_ALIAS") ?  System.getenv('BITRISEIO_ANDROID_KEYSTORE_ALIAS') : properties.getProperty("bitriseio.android_keystore_alias")
+def codeSigningKeyPassword = System.hasProperty("BITRISEIO_ANDROID_KEYSTORE_PRIVATE_KEY_PASSWORD") ?  System.getenv('BITRISEIO_ANDROID_KEYSTORE_PRIVATE_KEY_PASSWORD') : properties.getProperty("bitriseio.android_keystore_private_key_password")
+def codeSigningStorePassword = System.hasProperty("BITRISEIO_ANDROID_KEYSTORE_PASSWORD") ?  System.getenv('BITRISEIO_ANDROID_KEYSTORE_PASSWORD') : properties.getProperty("bitriseio.android_keystore_password")
+
 android {
     signingConfigs {
         release {
-            storeFile file('/Users/imre.kelenyi/develop/android-keystores/upload-keystore.jks')
-            keyAlias 'upload'
-            keyPassword 'VK4qNdmtFm2qVWyq'
-            storePassword 'AWkny77B6fbAV3ty'
+            storeFile file(System.getenv("HOME") + '/develop/android-keystores/upload-keystore.jks')
+            keyAlias codeSigningKeyAlias
+            keyPassword codeSigningKeyPassword
+            storePassword codeSigningStorePassword
         }
     }
     compileSdkVersion 30
