@@ -18,7 +18,7 @@ android {
     signingConfigs {
         release {
             storeFile file(System.getenv("HOME") + '/develop/android-keystores/upload-keystore.jks')
-            storePassword System.getenv("BITRISEIO_ANDROID_KEYSTORE_PASSWORD")
+            storePassword System.hasProperty("BITRISEIO_ANDROID_KEYSTORE_PASSWORD") ?  System.getenv('BITRISEIO_ANDROID_KEYSTORE_PASSWORD') : properties.getProperty("bitriseio.android_keystore_password")
             keyAlias codeSigningKeyAlias
             keyPassword codeSigningKeyPassword
         }
