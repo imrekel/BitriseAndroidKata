@@ -10,15 +10,15 @@ if (propertiesFile.exists()) {
 }
 
 // setting up code signing environment
-def codeSigningKeyAlias =  System.hasProperty("BITRISEIO_ANDROID_KEYSTORE_ALIAS") ?  System.getenv('BITRISEIO_ANDROID_KEYSTORE_ALIAS') : properties.getProperty("bitriseio.android_keystore_alias")
-def codeSigningKeyPassword = System.hasProperty("BITRISEIO_ANDROID_KEYSTORE_PRIVATE_KEY_PASSWORD") ?  System.getenv('BITRISEIO_ANDROID_KEYSTORE_PRIVATE_KEY_PASSWORD') : properties.getProperty("bitriseio.android_keystore_private_key_password")
-def codeSigningStorePassword = System.hasProperty("BITRISEIO_ANDROID_KEYSTORE_PASSWORD") ?  System.getenv('BITRISEIO_ANDROID_KEYSTORE_PASSWORD') : properties.getProperty("bitriseio.android_keystore_password")
+def codeSigningKeyAlias =  System.getenv("BITRISEIO_ANDROID_KEYSTORE_ALIAS") ?: properties.getProperty("bitriseio.android_keystore_alias")
+def codeSigningKeyPassword = System.getenv("BITRISEIO_ANDROID_KEYSTORE_PRIVATE_KEY_PASSWORD") ?: properties.getProperty("bitriseio.android_keystore_private_key_password")
+def codeSigningStorePassword = System.getenv("BITRISEIO_ANDROID_KEYSTORE_PASSWORD") ?: properties.getProperty("bitriseio.android_keystore_password")
 
 android {
     signingConfigs {
         release {
             storeFile file(System.getenv("HOME") + '/develop/android-keystores/upload-keystore.jks')
-            storePassword System.hasProperty("BITRISEIO_ANDROID_KEYSTORE_PASSWORD") ?  System.getenv('BITRISEIO_ANDROID_KEYSTORE_PASSWORD') : properties.getProperty("bitriseio.android_keystore_password")
+            storePassword codeSigningStorePassword
             keyAlias codeSigningKeyAlias
             keyPassword codeSigningKeyPassword
         }
