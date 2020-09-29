@@ -18,9 +18,9 @@ android {
     signingConfigs {
         release {
             storeFile file(System.getenv("HOME") + '/develop/android-keystores/upload-keystore.jks')
+            storePassword codeSigningStorePassword
             keyAlias codeSigningKeyAlias
             keyPassword codeSigningKeyPassword
-            storePassword codeSigningStorePassword
         }
     }
     compileSdkVersion 30
