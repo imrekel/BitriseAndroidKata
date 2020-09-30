@@ -1,0 +1,124 @@
+---
+format_version: '8'
+default_step_lib_source: 'https://github.com/bitrise-io/bitrise-steplib.git'
+project_type: android
+trigger_map:
+- push_branch: '*/debug'
+  workflow: combined
+- push_branch: '*/release'
+  workflow: combined
+- push_branch: '*'
+  workflow: primary
+- pull_request_source_branch: '*'
+  workflow: primary
+- tag: '*'
+  workflow: release
+workflows:
+  release:    
+    steps:
+    - activate-ssh-key@4:
+        run_if: '{{getenv "SSH_RSA_PRIVATE_KEY" | ne ""}}'
+    - git-clone@4: {}
+    - cache-pull@2: {}
+    - script@1:
+        title: Do anything with Script step
+    - install-missing-android-tools@2:
+        inputs:
+        - gradlew_path: $PROJECT_LOCATION/gradlew
+    - change-android-versioncode-and-versionname@1:
+        inputs:
+        - build_gradle_path: $PROJECT_LOCATION/$MODULE/build.gradle
+    - android-lint@0:
+        inputs:
+        - project_location: $PROJECT_LOCATION
+        - module: $MODULE
+        - variant: $VARIANT
+    - file-downloader@1:
+        inputs:
+        - destination: $HOME/develop/android-keystores/upload-keystore.jks
+        - source: $BITRISEIO_ANDROID_KEYSTORE_URL
+    - android-build@0:
+        inputs:
+        - project_location: $PROJECT_LOCATION
+        - module: $MODULE
+        - variant: release
+    - deploy-to-bitrise-io@1: {}
+  primary:
+    steps:
+    - activate-ssh-key@4:
+        run_if: '{{getenv "SSH_RSA_PRIVATE_KEY" | ne ""}}'
+    - git-clone@4: {}
+    - cache-pull@2: {}
+    - script@1:
+        title: Do anything with Script step
+    - install-missing-android-tools@2:
+        inputs:
+        - gradlew_path: $PROJECT_LOCATION/gradlew
+    - android-lint@0:
+        inputs:
+        - project_location: $PROJECT_LOCATION
+        - module: $MODULE
+        - variant: $VARIANT
+    - android-unit-test@1:
+        inputs:
+        - project_location: $PROJECT_LOCATION
+        - module: $MODULE
+        - variant: $VARIANT
+    - android-build-for-ui-testing@0:
+        inputs:
+        - variant: debug
+        - module: app
+    - virtual-device-testing-for-android@1:
+        inputs:
+        - test_devices: ' Pixel2,26,en,portrait'
+        - inst_test_targets: package com.example.bitriseandroidkata
+        - test_type: instrumentation
+    - deploy-to-bitrise-io@1: {}
+    - cache-push@2: {}
+  combined:
+    steps:
+    - activate-ssh-key@4:
+        run_if: '{{getenv "SSH_RSA_PRIVATE_KEY" | ne ""}}'
+    - git-clone@4: {}
+    - cache-pull@2: {}
+    - script@1:
+        title: Do anything with Script step
+    - install-missing-android-tools@2:
+        inputs:
+        - gradlew_path: $PROJECT_LOCATION/gradlew
+    - change-android-versioncode-and-versionname@1:
+        inputs:
+        - build_gradle_path: $PROJECT_LOCATION/$MODULE/build.gradle
+    - android-lint@0:
+        inputs:
+        - project_location: $PROJECT_LOCATION
+        - module: $MODULE
+        - variant: $VARIANT
+    - file-downloader@1:
+        inputs:
+        - destination: $HOME/develop/android-keystores/upload-keystore.jks
+        - source: $BITRISEIO_ANDROID_KEYSTORE_URL
+    - android-build@0:
+        run_if: '{{getenv "BITRISE_GIT_BRANCH" | ne "feature/debug"}}'
+        inputs:
+        - project_location: $PROJECT_LOCATION
+        - module: $MODULE
+        - variant: release
+    - android-build@0:
+        run_if: '{{getenv "BITRISE_GIT_BRANCH" | ne "feature/release"}}'
+        inputs:
+        - variant: debug
+        - project_location: $PROJECT_LOCATION
+        - module: $MODULE
+    - deploy-to-bitrise-io@1: {}
+app:
+  envs:
+  - opts:
+      is_expand: false
+    PROJECT_LOCATION: .
+  - opts:
+      is_expand: false
+    MODULE: app
+  - opts:
+      is_expand: false
+    VARIANT: release
