@@ -107,9 +107,12 @@ workflows:
         - project_location: $PROJECT_LOCATION
         - module: $MODULE
     - deploy-to-bitrise-io@1: {}
+
   cli-kata:
     before_run:
     - _prepare
+    after_run:
+    - _finalize
     envs:
     - ANDROID_KEYSTORE_PATH: $HOME/develop/android-keystores/upload-keystore.jks
     steps:
@@ -122,14 +125,27 @@ workflows:
             }}debug{{ end }}
           opts:
             is_template: true
+
   _prepare:
     steps:
-    - git-clone@4: {}
-    - cache-pull@2:
-        is_always_run: true
+    - git-clone@4:
+        is_skippable: true
+    - cache-pull@2: {}
+
   _finalize:
     steps:
-    - sign-apk@1: {}
+    - sign-apk@1:
+        outputs:
+        - BITRISE_APK_PATH: FINAL_ANDROID_APP
+    - generate-text-file@0:
+        is_always_run: true
+        inputs:
+        - file_content: $FINAL_ANDROID_APP = {{getenv "FINAL_ANDROID_APP"}}            
+          opts:
+            is_template: true
+            is_expand: false        
+        - file_name: RESULT.TXT
+
 app:
   envs:
   - opts:
