@@ -3,16 +3,16 @@ format_version: '8'
 default_step_lib_source: 'https://github.com/bitrise-io/bitrise-steplib.git'
 project_type: android
 trigger_map:
-- push_branch: 'cli-kata'
+- push_branch: cli-kata
   workflow: cli-kata
-- push_branch: 'master'
+- push_branch: master
   workflow: primary
 - pull_request_source_branch: '*'
   workflow: primary
 - tag: '*'
   workflow: release
 workflows:
-  release:    
+  release:
     steps:
     - activate-ssh-key@4:
         run_if: '{{getenv "SSH_RSA_PRIVATE_KEY" | ne ""}}'
@@ -111,20 +111,15 @@ workflows:
     before_run:
     - _prepare
     envs:
-    - ANDROID_KEYSTORE_PATH: '$HOME/develop/android-keystores/upload-keystore.jks'
+    - ANDROID_KEYSTORE_PATH: $HOME/develop/android-keystores/upload-keystore.jks
     steps:
-    # - file-downloader@1:
-    #     inputs:
-    #     - destination: $HOME/develop/android-keystores/upload-keystore.jks
-    #     - source: $BITRISEIO_ANDROID_KEYSTORE_URL
-    # - install-missing-android-tools@2:
-    #     inputs:
-    #     - gradlew_path: $PROJECT_LOCATION/gradlew
     - android-build@0:
         inputs:
         - project_location: $PROJECT_LOCATION
         - module: app
-        - variant: '{{if getenv "ANDROID_KEYSTORE_PATH" | ne ""}}release{{ else }}debug{{ end }}'
+        - variant: >-
+            {{if getenv "ANDROID_KEYSTORE_PATH" | ne ""}}release{{ else
+            }}debug{{ end }}
           opts:
             is_template: true
   _prepare:
@@ -132,7 +127,9 @@ workflows:
     - git-clone@4: {}
     - cache-pull@2:
         is_always_run: true
-
+  _finalize:
+    steps:
+    - sign-apk@1: {}
 app:
   envs:
   - opts:
